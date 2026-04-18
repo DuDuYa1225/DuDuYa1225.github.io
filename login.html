@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录/注册 - 何必自演自醉资源站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.25);
+            --text-primary: white;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --input-border: rgba(255, 255, 255, 0.2);
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow-color: rgba(102, 126, 234, 0.4);
+        }
+
+        body.light {
+            --glass-bg: rgba(0, 0, 0, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-primary: #f0f0f0;
+            --text-secondary: #e0e0e0;
+            --input-bg: rgba(0, 0, 0, 0.5);
+            --input-border: rgba(255, 255, 255, 0.15);
+            --primary-gradient: linear-gradient(135deg, #5a67d8 0%, #6b46a0 100%);
+            --shadow-color: rgba(90, 103, 216, 0.3);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+        }
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: -1;
+        }
+        body.light .bg-overlay {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(102, 126, 234, 0.5);
+        }
+
+        .auth-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 40px;
+            width: 460px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.2);
+            border-bottom: 2px solid #667eea;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+
+        .form-title {
+            text-align: center;
+            color: var(--text-primary);
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid var(--input-border);
+            border-radius: 16px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 1em;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-group small {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-top: 5px;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 40px;
+            background: var(--primary-gradient);
+            color: white;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-msg, .success-msg {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 12px;
+            display: none;
+            font-size: 0.9em;
+        }
+        .error-msg {
+            color: #ffb4b4;
+            background: rgba(255, 0, 0, 0.15);
+        }
+        .success-msg {
+            color: #a0ffa0;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 550px) {
+            .auth-container {
+                width: 95%;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-layer" id="bgLayer"></div>
+    <div class="bg-overlay"></div>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+
+    <div class="auth-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="login">🔐 登录</button>
+            <button class="tab-btn" data-tab="register">📝 注册</button>
+        </div>
+
+        <!-- 登录 -->
+        <div id="loginPane" class="tab-pane active">
+            <div class="form-title">何必自演自醉</div>
+            <form id="loginForm">
+                <div class="error-msg" id="loginErrorMsg"></div>
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="loginUsername" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="auth-btn" id="loginBtn">登 录</button>
+            </form>
+        </div>
+
+        <!-- 注册（需要邀请码） -->
+        <div id="registerPane" class="tab-pane">
+            <div class="form-title">注册新账号</div>
+            <form id="registerForm">
+                <div class="error-msg" id="registerErrorMsg"></div>
+                <div class="success-msg" id="registerSuccessMsg"></div>
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="regUsername" placeholder="请输入用户名（3-20个字符）" required>
+                    <small>只能包含字母、数字和下划线</small>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="regPassword" placeholder="请输入密码（至少6位）" required>
+                </div>
+                <div class="form-group">
+                    <label>确认密码</label>
+                    <input type="password" id="regConfirmPassword" placeholder="请再次输入密码" required>
+                </div>
+                <div class="form-group">
+                    <label>邀请码</label>
+                    <input type="text" id="regInviteCode" placeholder="请输入邀请码" required>
+                    <small>邀请码需要通过管理员购买获取</small>
+                </div>
+                <button type="submit" class="auth-btn" id="registerBtn">注 册</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ========== Supabase 配置 ==========
+        // 请替换为您的 Supabase 项目配置
+        const SUPABASE_URL = 'https://hngqhknncngqlztqwcdh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuZ3Foa25uY25ncWx6dHF3Y2RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NzI1OTksImV4cCI6MjA5MjA0ODU5OX0.TBF9hx4qzhluzBD4aj_nCFNclLW1VrwmDIilcGlL6j0';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // ========== 壁纸配置 ==========
+        const WALLPAPER_LIST = [
+            "https://example.com/wallpaper1.jpg",  // 替换为您的壁纸
+        ];
+        
+        function initWallpaper() {
+            const bgLayer = document.getElementById('bgLayer');
+            if (WALLPAPER_LIST.length > 0) {
+                const img = new Image();
+                img.onload = () => {
+                    bgLayer.style.backgroundImage = `url('${WALLPAPER_LIST[0]}')`;
+                    bgLayer.style.backgroundSize = 'cover';
+                    bgLayer.style.backgroundPosition = 'center';
+                };
+                img.src = WALLPAPER_LIST[0];
+            }
+        }
+        
+        // ========== 主题切换 ==========
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light');
+                document.getElementById('themeToggle').textContent = '☀️';
+            }
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('light');
+            localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+            document.getElementById('themeToggle').textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
+        });
+        
+        // ========== 标签页切换 ==========
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('loginPane').classList.toggle('active', btn.dataset.tab === 'login');
+                document.getElementById('registerPane').classList.toggle('active', btn.dataset.tab === 'register');
+            });
+        });
+        
+        // ========== 登录功能 ==========
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginErrorMsg');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            errorDiv.style.display = 'none';
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span class="loading"></span>登录中...';
+            
+            try {
+                // 查询用户
+                const { data: users, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', username)
+                    .eq('password', btoa(password));
+                
+                if (error) throw error;
+                
+                if (users && users.length > 0) {
+                    const user = users[0];
+                    // 保存登录状态
+                    sessionStorage.setItem('sessionLoggedIn', 'true');
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('currentUser', user.username);
+                    localStorage.setItem('userRole', user.role);
+                    localStorage.setItem('loginTime', Date.now().toString());
+                    
+                    // 跳转
+                    window.location.href = user.role === 'admin' ? 'admin.html' : 'index.html';
+                } else {
+                    errorDiv.textContent = '用户名或密码错误';
+                    errorDiv.style.display = 'block';
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '登 录';
+                }
+            } catch (err) {
+                errorDiv.textContent = '登录失败，请稍后重试';
+                errorDiv.style.display = 'block';
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '登 录';
+            }
+        });
+        
+        // ========== 注册功能（需要邀请码） ==========
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const inviteCode = document.getElementById('regInviteCode').value.trim();
+            const errorDiv = document.getElementById('registerErrorMsg');
+            const successDiv = document.getElementById('registerSuccessMsg');
+            const registerBtn = document.getElementById('registerBtn');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            // 客户端验证
+            if (username.length < 3 || username.length > 20) {
+                errorDiv.textContent = '用户名长度应为3-20个字符';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                errorDiv.textContent = '用户名只能包含字母、数字和下划线';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            if (password.length < 6) {
+                errorDiv.textContent = '密码长度至少6位';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            if (password !== confirmPassword) {
+                errorDiv.textContent = '两次输入的密码不一致';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<span class="loading"></span>注册中...';
+            
+            try {
+                // 1. 验证邀请码
+                const { data: inviteData, error: inviteError } = await supabase
+                    .from('invite_codes')
+                    .select('*')
+                    .eq('code', inviteCode)
+                    .eq('used', false);
+                
+                if (inviteError || !inviteData || inviteData.length === 0) {
+                    errorDiv.textContent = '邀请码无效或已被使用';
+                    errorDiv.style.display = 'block';
+                    registerBtn.disabled = false;
+                    registerBtn.innerHTML = '注 册';
+                    return;
+                }
+                
+                // 2. 检查用户名是否已存在
+                const { data: existingUser } = await supabase
+                    .from('users')
+                    .select('username')
+                    .eq('username', username);
+                
+                if (existingUser && existingUser.length > 0) {
+                    errorDiv.textContent = '用户名已存在';
+                    errorDiv.style.display = 'block';
+                    registerBtn.disabled = false;
+                    registerBtn.innerHTML = '注 册';
+                    return;
+                }
+                
+                // 3. 创建新用户
+                const { data: newUser, error: insertError } = await supabase
+                    .from('users')
+                    .insert([{
+                        username: username,
+                        password: btoa(password),
+                        role: 'user',
+                        registered_via: inviteCode
+                    }])
+                    .select();
+                
+                if (insertError) throw insertError;
+                
+                // 4. 标记邀请码为已使用
+                await supabase
+                    .from('invite_codes')
+                    .update({ used: true, used_by: username, used_at: new Date() })
+                    .eq('code', inviteCode);
+                
+                successDiv.textContent = '注册成功！请登录';
+                successDiv.style.display = 'block';
+                
+                // 清空表单
+                document.getElementById('regUsername').value = '';
+                document.getElementById('regPassword').value = '';
+                document.getElementById('regConfirmPassword').value = '';
+                document.getElementById('regInviteCode').value = '';
+                
+                // 2秒后切换到登录页
+                setTimeout(() => {
+                    document.querySelector('.tab-btn[data-tab="login"]').click();
+                    document.getElementById('loginUsername').value = username;
+                }, 2000);
+                
+            } catch (err) {
+                console.error(err);
+                errorDiv.textContent = '注册失败，请稍后重试';
+                errorDiv.style.display = 'block';
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = '注 册';
+            }
+        });
+        
+        // 检查是否已登录
+        if (sessionStorage.getItem('sessionLoggedIn') === 'true') {
+            const userRole = localStorage.getItem('userRole');
+            if (userRole === 'admin') window.location.href = 'admin.html';
+            else if (userRole === 'user') window.location.href = 'index.html';
+        }
+        
+        sessionStorage.removeItem('sessionLoggedIn');
+        initTheme();
+        initWallpaper();
+    </script>
+</body>
+</html>

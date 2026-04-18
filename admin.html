@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 何必自演自醉资源站</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: white;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --btn-danger: #ff6b6b;
+            --btn-success: #51cf66;
+        }
+        body.light {
+            --glass-bg: rgba(0, 0, 0, 0.06);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --input-bg: rgba(0, 0, 0, 0.03);
+        }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s;
+        }
+        body.light {
+            background: linear-gradient(135deg, #f0f2f5 0%, #e4e8ed 50%, #d8dee5 100%);
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; padding: 30px 20px; color: var(--text-primary); }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--glass-border);
+        }
+        .panel-title {
+            color: var(--text-primary);
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
+        .form-group { flex: 1; min-width: 200px; }
+        .form-group label { display: block; color: var(--text-secondary); margin-bottom: 8px; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            outline: none;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary-gradient);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-danger { background: var(--btn-danger); }
+        .btn-success { background: var(--btn-success); }
+        .btn-sm { padding: 6px 12px; font-size: 0.85rem; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .data-table th { background: rgba(102, 126, 234, 0.3); }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; }
+        .status-used { background: rgba(255, 107, 107, 0.3); color: #ff6b6b; }
+        .status-unused { background: rgba(81, 207, 102, 0.3); color: #51cf66; }
+        .message { padding: 12px 15px; border-radius: 12px; margin-bottom: 15px; display: none; }
+        .message-success { background: rgba(81, 207, 102, 0.3); border: 1px solid rgba(81, 207, 102, 0.5); color: #51cf66; }
+        .message-error { background: rgba(255, 107, 107, 0.3); border: 1px solid rgba(255, 107, 107, 0.5); color: #ff6b6b; }
+        .back-link {
+            display: inline-block;
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 10px 20px;
+            background: var(--glass-bg);
+            border-radius: 30px;
+            margin-bottom: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            font-size: 1.3rem;
+            z-index: 1000;
+            color: var(--text-primary);
+        }
+        .copy-btn {
+            background: rgba(102, 126, 234, 0.5);
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            margin-left: 8px;
+            font-size: 0.75rem;
+        }
+        @media (max-width: 768px) { .form-row { flex-direction: column; } .data-table { font-size: 0.85em; } }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+    <div class="container">
+        <a href="index.html" class="back-link">← 返回首页</a>
+        <div class="header">
+            <h1>管理后台</h1>
+            <div class="user-info">当前用户: <span id="currentUser"></span></div>
+        </div>
+        <div id="message"></div>
+
+        <!-- 添加用户面板 -->
+        <div class="panel">
+            <h2 class="panel-title">👤 添加新用户</h2>
+            <form id="addUserForm">
+                <div class="form-row">
+                    <div class="form-group"><label>用户名</label><input type="text" id="newUsername" required></div>
+                    <div class="form-group"><label>密码</label><input type="password" id="newPassword" required></div>
+                    <div class="form-group"><label>角色</label><select id="newRole"><option value="user">普通用户</option><option value="admin">管理员</option></select></div>
+                </div>
+                <button type="submit" class="btn btn-success">添加用户</button>
+            </form>
+        </div>
+
+        <!-- 邀请码管理面板 -->
+        <div class="panel">
+            <h2 class="panel-title">🎫 邀请码管理 <button type="button" class="btn btn-sm" id="generateInviteCodeBtn" style="margin-left: auto;">+ 生成邀请码</button></h2>
+            <div class="form-row" style="margin-bottom: 20px;">
+                <div class="form-group" style="flex: 2;"><label>手动添加邀请码</label><input type="text" id="manualInviteCode" placeholder="输入邀请码"></div>
+                <div class="form-group" style="flex: 0;"><label style="opacity: 0;">操作</label><button type="button" class="btn btn-success" id="addInviteCodeBtn">添加</button></div>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>邀请码</th><th>状态</th><th>创建时间</th><th>使用者</th><th>操作</th></tr></thead>
+                <tbody id="inviteCodesBody"><tr><td colspan="5" style="text-align:center;padding:40px;">加载中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <!-- 用户列表 -->
+        <div class="panel">
+            <h2 class="panel-title">👥 用户列表</h2>
+            <table class="data-table">
+                <thead><tr><th>用户名</th><th>角色</th><th>注册时间</th><th>注册方式</th><th>操作</th></tr></thead>
+                <tbody id="usersBody"><tr><td colspan="5" style="text-align:center;padding:40px;">加载中...</td></tr></tbody>
+            </table>
+        </div>
+        <div style="text-align: center;"><button class="btn btn-danger" onclick="logout()">退出登录</button></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ========== Supabase 配置（与 login.html 保持一致）==========
+        const SUPABASE_URL = 'https://hngqhknncngqlztqwcdh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuZ3Foa25uY25ncWx6dHF3Y2RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NzI1OTksImV4cCI6MjA5MjA0ODU5OX0.TBF9hx4qzhluzBD4aj_nCFNclLW1VrwmDIilcGlL6j0';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentUser = null;
+        
+        // 检查登录状态
+        async function checkAuth() {
+            const sessionLoggedIn = sessionStorage.getItem('sessionLoggedIn');
+            const userRole = localStorage.getItem('userRole');
+            const username = localStorage.getItem('currentUser');
+            
+            if (!sessionLoggedIn || userRole !== 'admin') {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            currentUser = username;
+            document.getElementById('currentUser').textContent = username;
+            return true;
+        }
+        
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.className = `message message-${type}`;
+            msgDiv.textContent = text;
+            msgDiv.style.display = 'block';
+            setTimeout(() => msgDiv.style.display = 'none', 3000);
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        }
+        
+        // 加载用户列表
+        async function loadUsers() {
+            const { data, error } = await supabase.from('users').select('*').order('id');
+            if (error) return;
+            const tbody = document.getElementById('usersBody');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">暂无用户</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.map(user => `
+                <tr>
+                    <td>${escapeHtml(user.username)}</td>
+                    <td><span class="status-badge ${user.role === 'admin' ? 'status-used' : 'status-unused'}">${user.role === 'admin' ? '管理员' : '普通用户'}</span></td>
+                    <td>${formatDate(user.created_at)}</td>
+                    <td>${user.registered_via || '手动添加'}</td>
+                    <td>${user.username !== 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${escapeHtml(user.username)}')">删除</button>` : '-'}</td>
+                </tr>
+            `).join('');
+        }
+        
+        async function deleteUser(username) {
+            if (!confirm(`确定删除用户 "${username}" 吗？`)) return;
+            const { error } = await supabase.from('users').delete().eq('username', username);
+            if (error) showMessage('删除失败', 'error');
+            else { showMessage('用户已删除', 'success'); loadUsers(); loadInviteCodes(); }
+        }
+        
+        // 加载邀请码列表
+        async function loadInviteCodes() {
+            const { data, error } = await supabase.from('invite_codes').select('*').order('id', { ascending: false });
+            if (error) return;
+            const tbody = document.getElementById('inviteCodesBody');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">暂无邀请码</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.map(code => `
+                <tr>
+                    <td style="font-family: monospace;">${escapeHtml(code.code)}<button class="copy-btn" onclick="copyToClipboard('${escapeHtml(code.code)}')">复制</button></td>
+                    <td><span class="status-badge ${code.used ? 'status-used' : 'status-unused'}">${code.used ? '已使用' : '未使用'}</span></td>
+                    <td>${formatDate(code.created_at)}</td>
+                    <td>${code.used_by || '-'}</td>
+                    <td>${!code.used ? `<button class="btn btn-danger btn-sm" onclick="deleteInviteCode('${escapeHtml(code.code)}')">删除</button>` : '-'}</td>
+                </tr>
+            `).join('');
+        }
+        
+        async function deleteInviteCode(code) {
+            if (!confirm(`确定删除邀请码 "${code}" 吗？`)) return;
+            const { error } = await supabase.from('invite_codes').delete().eq('code', code);
+            if (error) showMessage('删除失败', 'error');
+            else { showMessage('邀请码已删除', 'success'); loadInviteCodes(); }
+        }
+        
+        async function addInviteCode(code) {
+            const { error } = await supabase.from('invite_codes').insert([{ code: code.toUpperCase(), used: false }]);
+            if (error) return false;
+            return true;
+        }
+        
+        function generateRandomCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            return code;
+        }
+        
+        // 添加用户
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const role = document.getElementById('newRole').value;
+            if (!username || !password) { showMessage('请填写完整信息', 'error'); return; }
+            const { error } = await supabase.from('users').insert([{ username, password: btoa(password), role }]);
+            if (error) showMessage('用户名已存在或添加失败', 'error');
+            else { showMessage('用户添加成功', 'success'); loadUsers(); }
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+        });
+        
+        // 生成邀请码
+        document.getElementById('generateInviteCodeBtn').addEventListener('click', async () => {
+            const newCode = generateRandomCode();
+            if (await addInviteCode(newCode)) { showMessage(`邀请码生成成功: ${newCode}`, 'success'); loadInviteCodes(); }
+            else showMessage('生成失败', 'error');
+        });
+        
+        document.getElementById('addInviteCodeBtn').addEventListener('click', async () => {
+            const manualCode = document.getElementById('manualInviteCode').value.trim().toUpperCase();
+            if (!manualCode) { showMessage('请输入邀请码', 'error'); return; }
+            if (await addInviteCode(manualCode)) {
+                document.getElementById('manualInviteCode').value = '';
+                showMessage(`邀请码添加成功: ${manualCode}`, 'success');
+                loadInviteCodes();
+            } else showMessage('邀请码已存在', 'error');
+        });
+        
+        function copyToClipboard(text) { navigator.clipboard.writeText(text); showMessage('已复制', 'success'); }
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+        
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+        
+        function initTheme() {
+            if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
+            document.getElementById('themeToggle').textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
+        }
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('light');
+            localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+            document.getElementById('themeToggle').textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
+        });
+        
+        initTheme();
+        if (checkAuth()) { loadUsers(); loadInviteCodes(); }
+        window.deleteUser = deleteUser;
+        window.deleteInviteCode = deleteInviteCode;
+        window.copyToClipboard = copyToClipboard;
+    </script>
+</body>
+</html>

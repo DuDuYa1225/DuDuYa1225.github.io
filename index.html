@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>何必自演自醉资源站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-bg-strong: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: white;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --input-border: rgba(255, 255, 255, 0.2);
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow-color: rgba(102, 126, 234, 0.4);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --top-bar-bg: rgba(0, 0, 0, 0.4);
+            --btn-danger: #ff6b6b;
+            --btn-danger-hover: #ee5a5a;
+        }
+
+        body.light {
+            --glass-bg: rgba(0, 0, 0, 0.5);
+            --glass-bg-strong: rgba(0, 0, 0, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-primary: #f0f0f0;
+            --text-secondary: #e0e0e0;
+            --text-muted: #c0c0c0;
+            --input-bg: rgba(0, 0, 0, 0.5);
+            --input-border: rgba(255, 255, 255, 0.15);
+            --primary-gradient: linear-gradient(135deg, #5a67d8 0%, #6b46a0 100%);
+            --shadow-color: rgba(90, 103, 216, 0.3);
+            --card-bg: rgba(0, 0, 0, 0.4);
+            --top-bar-bg: rgba(0, 0, 0, 0.6);
+            --btn-danger: #e55a5a;
+            --btn-danger-hover: #d44a4a;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: all 0.3s ease;
+            z-index: -2;
+        }
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: -1;
+        }
+        body.light .bg-overlay {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 25px;
+            background: var(--top-bar-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 50px;
+            margin-bottom: 25px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .user-welcome {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .right-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            background: rgba(102, 126, 234, 0.3);
+        }
+
+        .logout-btn {
+            background: var(--btn-danger);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn:hover {
+            background: var(--btn-danger-hover);
+            transform: scale(1.02);
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px var(--shadow-color);
+        }
+
+        header .contact-info {
+            font-size: 1em;
+            opacity: 0.9;
+            background: var(--glass-bg);
+            padding: 15px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            border: 1px solid var(--glass-border);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .stat-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: 12px 28px;
+            border-radius: 30px;
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+        .stat-number { font-size: 2em; font-weight: bold; color: #667eea; }
+
+        .search-box {
+            max-width: 600px;
+            margin: 20px auto;
+            position: relative;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 60px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .search-container:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 20px var(--shadow-color);
+        }
+
+        .search-mode-wrapper {
+            position: relative;
+            border-right: 1px solid var(--glass-border);
+        }
+        .search-mode {
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            padding: 14px 35px 14px 20px;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            border: none;
+            cursor: pointer;
+            outline: none;
+            font-weight: 500;
+        }
+        .search-mode option {
+            background: #1a1a2e;
+            color: var(--text-primary);
+        }
+        body.light .search-mode option {
+            background: #e4e8ed;
+            color: #1a1a2e;
+        }
+        .search-mode-wrapper::after {
+            content: '⌵';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            font-size: 1.2rem;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 14px 18px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            outline: none;
+            font-size: 0.95rem;
+        }
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-btn {
+            padding: 14px 24px;
+            background: transparent;
+            border: none;
+            border-left: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        .search-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+        }
+
+        .music-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg-strong);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            border: 1px solid var(--glass-border);
+        }
+        .music-results.hidden { display: none; }
+        
+        .song-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--glass-border);
+            transition: background 0.2s;
+        }
+        .song-item:hover { background: rgba(102, 126, 234, 0.2); }
+        .song-cover { width: 45px; height: 45px; border-radius: 10px; margin-right: 12px; object-fit: cover; }
+        .song-info { flex: 1; }
+        .song-title { color: var(--text-primary); font-weight: 600; margin-bottom: 4px; }
+        .song-artist { color: var(--text-muted); font-size: 0.8rem; }
+        .song-play-btn {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(102, 126, 234, 0.3);
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .song-play-btn:hover {
+            background: #667eea;
+            transform: scale(1.05);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 22px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            background: var(--glass-bg);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .card-title:hover {
+            color: #667eea;
+        }
+        .card-link {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+            cursor: pointer;
+            word-break: break-all;
+        }
+        .card-link:hover {
+            color: #667eea;
+        }
+        .password-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .password-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .password-value {
+            font-family: monospace;
+            color: #667eea;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .password-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .action-btn {
+            background: rgba(102, 126, 234, 0.6);
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.75rem;
+        }
+        .action-btn:hover {
+            background: #667eea;
+            transform: scale(1.02);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-primary);
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .music-player {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            z-index: 9999;
+        }
+        .player-toggle {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        .player-toggle:hover {
+            transform: scale(1.05);
+        }
+        .player-expanded {
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            width: 300px;
+            background: var(--glass-bg-strong);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 15px;
+            display: none;
+            border: 1px solid var(--glass-border);
+        }
+        .music-player.active .player-expanded { display: block; }
+        .player-info { text-align: center; color: var(--text-primary); margin-bottom: 12px; }
+        .player-title { font-weight: bold; margin-bottom: 4px; }
+        .player-artist { font-size: 12px; opacity: 0.7; }
+        .player-progress {
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .player-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #667eea;
+            border-radius: 2px;
+        }
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .player-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .player-btn:hover {
+            background: #667eea;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            opacity: 0;
+            transition: 0.3s;
+            z-index: 10000;
+        }
+        .toast.show { opacity: 1; bottom: 50px; }
+        
+        @media (max-width: 768px) {
+            .cards-grid { grid-template-columns: 1fr; }
+            .top-bar { flex-direction: row; justify-content: space-between; }
+            header h1 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-layer" id="bgLayer"></div>
+    <div class="bg-overlay"></div>
+    
+    <div class="container">
+        <div class="top-bar">
+            <span class="user-welcome">👤 欢迎，<span id="currentUserSpan"></span></span>
+            <div class="right-actions">
+                <button class="theme-toggle" id="themeToggle">🌙</button>
+                <button class="logout-btn" id="logoutBtn">🚪 退出登录</button>
+            </div>
+        </div>
+        
+        <header>
+            <h1>何必自演自醉资源站 ✨</h1>
+            <div class="contact-info">
+                <p>📱 作者QQ：840567851 &nbsp;|&nbsp; 💬 远程QQ：2550240985 &nbsp;|&nbsp; 👥 Q群：757742829</p>
+            </div>
+            <div class="stats">
+                <div class="stat-item">📦 资源总数 <span id="totalResources">0</span></div>
+            </div>
+            <div class="search-box">
+                <div class="search-container">
+                    <div class="search-mode-wrapper">
+                        <select id="searchMode" class="search-mode">
+                            <option value="resource">📦 资源搜索</option>
+                            <option value="music">🎵 歌曲搜索</option>
+                        </select>
+                    </div>
+                    <input type="text" id="searchInput" placeholder="搜索资源名称...">
+                    <button id="searchBtn" class="search-btn">🔍</button>
+                </div>
+                <div id="musicResults" class="music-results hidden"></div>
+            </div>
+        </header>
+        
+        <div class="cards-grid" id="cardsContainer"></div>
+        <div class="empty-state" id="emptyState">🔍 未找到相关资源</div>
+        <footer>📅 更新日期：2026.4.6 | 何必自演自醉 © 2026</footer>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+
+    <div class="music-player" id="musicPlayer">
+        <div class="player-expanded">
+            <div class="player-info">
+                <div class="player-title" id="playerTitle">未播放</div>
+                <div class="player-artist" id="playerArtist">-</div>
+            </div>
+            <div class="player-progress" id="playerProgress">
+                <div class="player-progress-bar" id="playerProgressBar"></div>
+            </div>
+            <div class="player-controls">
+                <button class="player-btn" id="prevBtn">⏮</button>
+                <button class="player-btn" id="playPauseBtn">▶</button>
+                <button class="player-btn" id="nextBtn">⏭</button>
+            </div>
+        </div>
+        <button class="player-toggle" id="playerToggle">🎵</button>
+        <audio id="audioPlayer"></audio>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ==================== Supabase 配置 ====================
+        // 【重要】请替换为您的 Supabase 项目配置
+        // 1. 在 supabase.com 注册并创建项目
+        // 2. 在项目设置 -> API 中找到以下两个值
+        // ====================================================
+        const SUPABASE_URL = 'https://hngqhknncngqlztqwcdh.supabase.co';      // 👈 替换为您的 Supabase URL
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuZ3Foa25uY25ncWx6dHF3Y2RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NzI1OTksImV4cCI6MjA5MjA0ODU5OX0.TBF9hx4qzhluzBD4aj_nCFNclLW1VrwmDIilcGlL6j0';        
+        // 初始化 Supabase 客户端
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // ==================== 资源数据 ====================
+        const resources = [
+            { title: "模块收录", url: "https://pan.sysri.cn/s/yg2QIN/DuDuYa", password: "DuDuYa" },
+            { title: "刷机包工具合集（1号网盘）", url: "https://pan.sysri.cn/s/Avv9Cz/DuDuYa", password: "DuDuYa" },
+            { title: "工具合集（2号网盘）", url: "https://www.go127.com/s/Ojgsm/n11p271w", password: null },
+            { title: "谷歌相机-123盘", url: "https://www.123684.com/s/tbgEjv-PeA8?pwd=rU9c", password: "rU9c" },
+            { title: "资源下载链接", url: "https://yun.lian86.top", password: null },
+            { title: "备用下载链接2（速度快）", url: "https://lian.ovo.xcxll.cn/", password: null },
+            { title: "一加ROM下载站", url: "https://op-rom.lian86.top/", password: null },
+            { title: "文件夹twrp_root", url: null, password: "roottwrptoolbylian666" },
+            { title: "文件夹YCBOX", url: null, password: "coolapkliantool666" },
+            { title: "文件夹Lian_Payload_Flash_Tool", url: null, password: "coolapkliantool666" },
+            { title: "Lian-Payload-Flash-Tool 卡密", url: null, password: "lianbox123" },
+            { title: "文件夹欧真加出厂包", url: null, password: "coolapklianrom666" },
+            { title: "文件夹欧真加GKI", url: null, password: "coolapkliangki666" },
+            { title: "OnePlusROM工具 卡密", url: null, password: "OPDL_OT630F84PML0E6A4" },
+            { title: "文件夹Lian-Root-Flash-Tool", url: null, password: "coolapklianroot666" },
+            { title: "Lian-Root-Flash-Tool 卡密", url: null, password: "lianbox123" },
+            { title: "YcBox卡密", url: null, password: "lianbox123" },
+            { title: "玩机文件下载地址", url: "https://pan.xunlei.com/s/VOUi-35RjzTh3PleAWDWRL8iA1?pwd=eqdx", password: "eqdx" },
+            { title: "YD的资源站（小米红米Boot）", url: "https://nabian.top/", password: null },
+            { title: "LiquidBounce Client的资源站", url: "https://nekowithu.top", password: null },
+            { title: "可怜太可怜的资源站点", url: "https://yun.lian86.top", password: null },
+            { title: "OPPO深度测试不同机型的apk（1）", url: "https://wwa.lanzouv.com/b0e39onsh", password: "htki" },
+            { title: "OPPO深度测试不同机型的apk（2）", url: "https://xinkid.lanzouv.com/b073u3ghc", password: "54qm" },
+            { title: "小米刷机包", url: "https://roms.miuier.com/", password: null },
+            { title: "欧加真全量包", url: "https://op-rom.lian86.top/", password: null },
+            { title: "萤火虫资源站", url: "https://www.yhcres.top/", password: null },
+            { title: "小陈资源站", url: "http://xiaochen.pw/", password: null },
+            { title: "苹果绕ID工具", url: "https://duduya2008.lanzoul.com/b00q1cabah", password: "1324" },
+            { title: "小米MIX4刷机包", url: "https://www.123865.com/s/tbgEjv-gK98?pwd=Pe1w#", password: "Pe1w" },
+            { title: "红米K40游戏增强刷机包", url: "https://www.123865.com/s/tbgEjv-FK98?pwd=1324#", password: "1324" },
+            { title: "降级小包", url: "https://www.123865.com/s/tbgEjv-YK98?pwd=1324#", password: "1324" },
+            { title: "OPPOR9S9008", url: "https://www.123865.com/s/tbgEjv-GK98?pwd=1324#", password: "1324" },
+            { title: "华为奇兔TWRP集", url: "https://www.123865.com/s/tbgEjv-XK98?pwd=1324#", password: "1324" },
+            { title: "华为mate40pro三键包", url: "https://www.123865.com/s/tbgEjv-nK98?pwd=1324#", password: "1324" },
+            { title: "刷机小工具", url: "https://www.123865.com/s/tbgEjv-2K98?pwd=1324#", password: "1324" },
+            { title: "小米note3刷机包", url: "https://www.123865.com/s/tbgEjv-sK98?pwd=1324#", password: "1324" },
+            { title: "windows激活", url: "https://duduya2008.lanzoul.com/izsgN3mhqmta", password: null },
+            { title: "黑苹果工具", url: "https://duduya2008.lanzoul.com/b00q1cdqej", password: "1324" },
+            { title: "刷机工具合集", url: "https://duduya2008.lanzoul.com/b00q1cdr3e", password: "1324" },
+            { title: "自制小脚本", url: "https://duduya2008.lanzoul.com/b00q1cdrde", password: "1324" },
+            { title: "环境/驱动集（？最全？）", url: "https://duduya2008.lanzoul.com/b00q1cdrxe", password: "1324" },
+            { title: "电脑优化小工具", url: "https://duduya2008.lanzoul.com/b00q1cdsbi", password: "1324" },
+            { title: "玩机小工具（杂）", url: "https://duduya2008.lanzoul.com/b00q1cdszc", password: "1324" },
+            { title: "点击加入交流群", url: "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=2XcohyxuBD4Z8YdgKii2MpX3W5U1POJh&authKey=aZZGgSu%2FHtYTBaaq4ZonYpuXXGYxw8oOTYO9fmFHT56Ro4kGs8%2BLxWeR%2Faptn0On&noverify=0&group_code=757742829", password: "757742829" }
+        ];
+
+        // ==================== 壁纸配置 ====================
+        const WALLPAPER_LIST = [
+            "https://picui.ogmua.cn/s1/2026/04/06/69d35f0b23a50.webp",
+            "https://picui.ogmua.cn/s1/2026/04/06/69d360418bfc6.webp",
+            "https://picui.ogmua.cn/s1/2026/04/06/69d36045901fe.web",
+        ];
+        
+        const FALLBACK_COLOR = "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)";
+        let currentWallpaperIndex = 0;
+        
+        function setRandomWallpaper() {
+            if (!WALLPAPER_LIST || WALLPAPER_LIST.length === 0) {
+                useFallbackBackground();
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * WALLPAPER_LIST.length);
+            const wallpaperUrl = WALLPAPER_LIST[randomIndex];
+            if (!wallpaperUrl) {
+                useFallbackBackground();
+                return;
+            }
+            const img = new Image();
+            img.onload = function() {
+                const bgLayer = document.getElementById('bgLayer');
+                bgLayer.style.backgroundImage = `url('${wallpaperUrl}')`;
+                bgLayer.style.backgroundSize = 'cover';
+                bgLayer.style.backgroundPosition = 'center';
+                localStorage.setItem('cachedWallpaper', wallpaperUrl);
+                localStorage.setItem('cachedWallpaperDate', new Date().toDateString());
+            };
+            img.onerror = function() {
+                console.warn('壁纸加载失败:', wallpaperUrl);
+                if (currentWallpaperIndex < WALLPAPER_LIST.length * 2) {
+                    currentWallpaperIndex++;
+                    setRandomWallpaper();
+                } else {
+                    useFallbackBackground();
+                }
+            };
+            img.src = wallpaperUrl;
+        }
+        
+        function useCachedWallpaper() {
+            const cached = localStorage.getItem('cachedWallpaper');
+            const cachedDate = localStorage.getItem('cachedWallpaperDate');
+            const today = new Date().toDateString();
+            if (cached && cachedDate === today) {
+                document.getElementById('bgLayer').style.backgroundImage = `url('${cached}')`;
+                document.getElementById('bgLayer').style.backgroundSize = 'cover';
+                document.getElementById('bgLayer').style.backgroundPosition = 'center';
+                return true;
+            }
+            return false;
+        }
+        
+        function useFallbackBackground() {
+            document.getElementById('bgLayer').style.background = FALLBACK_COLOR;
+        }
+        
+        function initWallpaper() {
+            if (!useCachedWallpaper()) {
+                setRandomWallpaper();
+            }
+        }
+
+        // ========== 登录状态检查（Supabase 云端验证）==========
+        async function checkAuthAndRedirect() {
+            const sessionLoggedIn = sessionStorage.getItem('sessionLoggedIn');
+            
+            if (!sessionLoggedIn) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            // 验证 session 是否有效（可选，增加安全性）
+            const currentUser = localStorage.getItem('currentUser');
+            const userRole = localStorage.getItem('userRole');
+            
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            document.getElementById('currentUserSpan').innerText = currentUser;
+            return true;
+        }
+
+        function logout() {
+            // 清除所有本地存储
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('loginTime');
+            sessionStorage.removeItem('sessionLoggedIn');
+            // 跳转到登录页
+            window.location.href = 'login.html';
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function openResourceUrl(url) {
+            if (url) {
+                window.open(url, '_blank');
+            } else {
+                showToast('该资源暂无链接');
+            }
+        }
+
+        function togglePassword(index, password) {
+            const pwdSpan = document.getElementById(`pwd-value-${index}`);
+            const toggleBtn = document.getElementById(`toggle-btn-${index}`);
+            if (pwdSpan.dataset.hidden === 'true') {
+                pwdSpan.textContent = password;
+                pwdSpan.dataset.hidden = 'false';
+                toggleBtn.textContent = '隐藏';
+            } else {
+                pwdSpan.textContent = '••••••';
+                pwdSpan.dataset.hidden = 'true';
+                toggleBtn.textContent = '显示';
+            }
+        }
+
+        async function copyPassword(password) {
+            try {
+                await navigator.clipboard.writeText(password);
+                showToast('✅ 密码已复制到剪贴板！');
+            } catch (err) {
+                const textarea = document.createElement('textarea');
+                textarea.value = password;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('✅ 密码已复制到剪贴板！');
+            }
+        }
+
+        function renderCards(filter = '') {
+            const container = document.getElementById('cardsContainer');
+            const filtered = resources.filter(r => r.title.toLowerCase().includes(filter.toLowerCase()));
+            const emptyState = document.getElementById('emptyState');
+            emptyState.style.display = filtered.length ? 'none' : 'block';
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = filtered.map((res, idx) => {
+                const uniqueId = resources.indexOf(res);
+                const displayLink = res.url ? (() => {
+                    try {
+                        return new URL(res.url).hostname;
+                    } catch(e) {
+                        return res.url.substring(0, 50) + (res.url.length > 50 ? '...' : '');
+                    }
+                })() : '暂无链接';
+                
+                const hasPassword = res.password && res.password.trim() !== '';
+                
+                return `
+                    <div class="card">
+                        <div class="card-title" onclick="openResourceUrl('${(res.url || '').replace(/'/g, "\\'")}')">
+                            📦 ${escapeHtml(res.title)}
+                        </div>
+                        ${displayLink !== '暂无链接' ? `<div class="card-link" onclick="openResourceUrl('${(res.url || '').replace(/'/g, "\\'")}')">🌐 ${escapeHtml(displayLink)}</div>` : ''}
+                        ${hasPassword ? `
+                        <div class="password-section">
+                            <div class="password-label">
+                                🔐 密码：<span class="password-value" id="pwd-value-${uniqueId}" data-hidden="true">••••••</span>
+                            </div>
+                            <div class="password-actions">
+                                <button class="action-btn" id="toggle-btn-${uniqueId}" onclick="event.stopPropagation(); togglePassword(${uniqueId}, '${res.password.replace(/'/g, "\\'")}')">显示</button>
+                                <button class="action-btn" onclick="event.stopPropagation(); copyPassword('${res.password.replace(/'/g, "\\'")}')">📋 复制</button>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function updateStats() { 
+            document.getElementById('totalResources').innerText = resources.length; 
+        }
+
+        async function searchMusic(term) {
+            const resultsDiv = document.getElementById('musicResults');
+            resultsDiv.classList.remove('hidden');
+            resultsDiv.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-primary);">🔍 搜索中...</div>';
+            try {
+                const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&entity=song&limit=20`);
+                const data = await resp.json();
+                if (data.results && data.results.length > 0) {
+                    resultsDiv.innerHTML = data.results.map(song => `
+                        <div class="song-item" data-url="${song.previewUrl || ''}" data-title="${escapeHtml(song.trackName || '未知')}" data-artist="${escapeHtml(song.artistName || '未知')}">
+                            <img src="${song.artworkUrl60 || ''}" class="song-cover" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 60 60%22%3E%3Crect fill=%22%23667eea%22 width=%2260%22 height=%2260%22/%3E%3Ctext x=%2230%22 y=%2235%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2220%22%3E🎵%3C/text%3E%3C/svg%3E'">
+                            <div class="song-info">
+                                <div class="song-title">${escapeHtml(song.trackName || '未知歌曲')}</div>
+                                <div class="song-artist">${escapeHtml(song.artistName || '未知艺术家')}</div>
+                            </div>
+                            <button class="song-play-btn" onclick="event.stopPropagation(); playMusicFromPreview(this)">▶</button>
+                        </div>
+                    `).join('');
+                } else {
+                    resultsDiv.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-primary);">未找到相关歌曲</div>';
+                }
+            } catch(e) {
+                resultsDiv.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-primary);">搜索失败，请稍后重试</div>';
+            }
+        }
+
+        function playMusicFromPreview(btn) {
+            const item = btn.closest('.song-item');
+            const url = item.dataset.url;
+            const title = item.dataset.title;
+            const artist = item.dataset.artist;
+            
+            if (!url) {
+                showToast('无试听链接');
+                return;
+            }
+            
+            const audio = document.getElementById('audioPlayer');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            
+            if (audio.src === url && !audio.paused) {
+                audio.pause();
+                playPauseBtn.textContent = '▶';
+                return;
+            }
+            
+            audio.src = url;
+            audio.play().catch(() => showToast('播放失败，请重试'));
+            document.getElementById('playerTitle').innerText = title || '未知歌曲';
+            document.getElementById('playerArtist').innerText = artist || '';
+            playPauseBtn.textContent = '⏸';
+            showToast(`🎵 正在播放：${title}`);
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light');
+                document.getElementById('themeToggle').textContent = '☀️';
+            } else {
+                document.body.classList.remove('light');
+                document.getElementById('themeToggle').textContent = '🌙';
+            }
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('light');
+            const isLight = document.body.classList.contains('light');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            document.getElementById('themeToggle').textContent = isLight ? '☀️' : '🌙';
+        });
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const isAuth = await checkAuthAndRedirect();
+            if (!isAuth) return;
+            
+            initWallpaper();
+            initTheme();
+            updateStats();
+            renderCards('');
+            
+            const searchBtn = document.getElementById('searchBtn');
+            const searchInput = document.getElementById('searchInput');
+            const searchMode = document.getElementById('searchMode');
+            const musicResults = document.getElementById('musicResults');
+            
+            searchBtn.addEventListener('click', function() {
+                const query = searchInput.value.trim();
+                if (!query) return;
+                if (searchMode.value === 'resource') {
+                    musicResults.classList.add('hidden');
+                    renderCards(query);
+                } else {
+                    searchMusic(query);
+                }
+            });
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchBtn.click();
+                }
+            });
+            
+            searchInput.addEventListener('input', function() {
+                if (searchMode.value === 'resource') {
+                    renderCards(this.value);
+                    musicResults.classList.add('hidden');
+                }
+            });
+            
+            searchMode.addEventListener('change', function() {
+                if (this.value === 'resource') {
+                    searchInput.placeholder = '搜索资源名称...';
+                    musicResults.classList.add('hidden');
+                    renderCards(searchInput.value);
+                } else {
+                    searchInput.placeholder = '搜索歌曲名称...';
+                    musicResults.classList.add('hidden');
+                }
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!musicResults.contains(e.target) && e.target !== searchInput && e.target !== searchBtn) {
+                    musicResults.classList.add('hidden');
+                }
+            });
+            
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+        
+        const playerToggle = document.getElementById('playerToggle');
+        const musicPlayerDiv = document.getElementById('musicPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const audio = document.getElementById('audioPlayer');
+        const progressBar = document.getElementById('playerProgressBar');
+        const progressContainer = document.getElementById('playerProgress');
+        
+        playerToggle.onclick = () => musicPlayerDiv.classList.toggle('active');
+        playPauseBtn.onclick = () => {
+            if (audio.paused) {
+                audio.play().catch(() => showToast('无播放内容'));
+            } else {
+                audio.pause();
+            }
+        };
+        audio.onplay = () => playPauseBtn.textContent = '⏸';
+        audio.onpause = () => playPauseBtn.textContent = '▶';
+        audio.ontimeupdate = () => {
+            if (audio.duration) {
+                let percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = percent + '%';
+            }
+        };
+        progressContainer.addEventListener('click', (e) => {
+            if (!audio.duration) return;
+            let rect = progressContainer.getBoundingClientRect();
+            let percent = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = percent * audio.duration;
+        });
+        document.getElementById('prevBtn').onclick = () => { if(audio.src) audio.currentTime = 0; };
+        document.getElementById('nextBtn').onclick = () => { if(audio.src) audio.currentTime = 0; };
+        
+        window.openResourceUrl = openResourceUrl;
+        window.togglePassword = togglePassword;
+        window.copyPassword = copyPassword;
+        window.playMusicFromPreview = playMusicFromPreview;
+    </script>
+</body>
+</html>
